@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Health Monitor</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <style>
+      :root {
+        --primary: #4a90e2;
+        --secondary: #6d5b97;
+        --success: #50c878;
+        --warning: #ffa500;
+        --danger: #ff4757;
+        --background: #f8f9fa;
+        --text: #2c3e50;
+      }
+
+      body {
+        font-family: "Poppins", sans-serif;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 2rem;
+        margin: 0;
+        transition: background 0.3s ease;
+      }
+
+      body.dark-mode {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        --text: #ecf0f1;
+        --background: #2c3e50;
+      }
+
+      .container {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        width: 100%;
+        max-width: 500px;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+        position: relative;
+      }
+
+      body.dark-mode .container {
+        background: rgba(44, 62, 80, 0.95);
+        color: #ecf0f1;
+      }
+
+      h1 {
+        color: var(--primary);
+        font-size: 2rem;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .input-group {
+        margin: 1.5rem 0;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--text);
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      input,
+      textarea {
+        width: 100%;
+        padding: 0.8rem;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.9);
+        color: var(--text);
+      }
+
+      body.dark-mode input,
+      body.dark-mode textarea {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: #34495e;
+        color: #ecf0f1;
+      }
+
+      .btn {
+        background: linear-gradient(
+          135deg,
+          var(--primary) 0%,
+          var(--secondary) 100%
+        );
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        font-size: 1rem;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        width: 100%;
+        margin-top: 1rem;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .btn::after {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: rgba(255, 255, 255, 0.1);
+        transform: rotate(45deg);
+        transition: all 0.5s ease;
+      }
+
+      .btn:hover::after {
+        left: 50%;
+      }
+
+      .bmi-gauge {
+        width: 100%;
+        height: 12px;
+        background: #e9ecef;
+        border-radius: 6px;
+        margin-top: 0.5rem;
+        overflow: hidden;
+      }
+
+      .bmi-progress {
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          var(--success) 0%,
+          var(--warning) 50%,
+          var(--danger) 100%
+        );
+        border-radius: 6px;
+        transition: width 0.5s ease;
+      }
+
+      .result-item {
+        background: rgba(248, 249, 250, 0.9);
+        padding: 1.5rem;
+        border-radius: 15px;
+        margin: 1.5rem 0;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      }
+
+      body.dark-mode .result-item {
+        background: rgba(44, 62, 80, 0.85);
+      }
+
+      .risk-level {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        display: inline-block;
+      }
+
+      .risk-low {
+        background-color: #50c878;
+        color: white;
+      }
+      .risk-medium {
+        background-color: #ffa500;
+        color: white;
+      }
+      .risk-high {
+        background-color: #ff4757;
+        color: white;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .fade-in {
+        animation: fadeIn 0.5s ease;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .theme-toggle {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--text);
+        font-size: 1.2rem;
+      }
+
+      #validationMsg {
+        color: red;
+        font-size: 0.9rem;
+        margin-top: -1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <button class="theme-toggle" onclick="toggleTheme()">
+        <i class="fas fa-moon"></i>
+      </button>
+
+      <h1><i class="fas fa-heartbeat"></i>Health Monitor</h1>
+
+      <form id="userForm">
+        <div class="input-group">
+          <label for="name"><i class="fas fa-user"></i>Name</label>
+          <input type="text" id="name" placeholder="Enter your Name" required />
+        </div>
+
+        <div class="input-group">
+          <label for="age"><i class="fas fa-calendar-alt"></i>Age</label>
+          <input
+            type="number"
+            id="age"
+            placeholder="Enter your age"
+            min="1"
+            max="120"
+            required
+          />
+        </div>
+
+        <div class="input-group">
+          <label for="bmi"><i class="fas fa-weight"></i>BMI</label>
+          <input
+            type="number"
+            id="bmi"
+            placeholder="Enter your BMI"
+            step="0.1"
+            min="10"
+            max="50"
+            required
+          />
+          <div class="bmi-gauge">
+            <div class="bmi-progress" id="bmiProgress"></div>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="symptoms"
+            ><i class="fas fa-thermometer"></i>Symptoms</label
+          >
+          <textarea
+            id="symptoms"
+            placeholder="Fever, Headache...etc"
+            rows="3"
+            required
+          ></textarea>
+        </div>
+
+        <div id="validationMsg"></div>
+
+        <button type="button" class="btn" onclick="registerUser()">
+          <i class="fas fa-stethoscope"></i> Analyze Health
+        </button>
+      </form>
+
+      <div id="predictionResult" class="hidden fade-in">
+        <div class="result-item">
+          <h2><i class="fas fa-diagnoses"></i> Diagnosis Summary</h2>
+          <p><strong>Name:</strong> <span id="resultName"></span></p>
+          <p><strong>BMI:</strong> <span id="resultBmi"></span></p>
+          <p>
+            <strong>Predicted Condition:</strong>
+            <span id="predictedDisease" class="risk-low">Healthy</span>
+          </p>
+        </div>
+
+        <div class="result-item">
+          <h2><i class="fas fa-exclamation-triangle"></i> Risk Assessment</h2>
+          <p>
+            <span id="riskLevel" class="risk-level risk-low">Low Risk</span>
+          </p>
+          <p id="recommendedMonitoring"></p>
+        </div>
+
+        <div class="result-item">
+          <h2><i class="fas fa-user-md"></i> Recommended Specialist</h2>
+          <p id="recommendedDoctor"></p>
+        </div>
+
+        <button class="btn" onclick="restartApp()">
+          <i class="fas fa-redo"></i> Start New Analysis
+        </button>
+      </div>
+    </div>
+
+    <script>
+      function toggleTheme() {
+        document.body.classList.toggle("dark-mode");
+        const icon = document.querySelector(".theme-toggle i");
+        icon.classList.toggle("fa-moon");
+        icon.classList.toggle("fa-sun");
+      }
+
+      function updateBmiGauge(bmi) {
+        const progress = document.getElementById("bmiProgress");
+        const width = Math.min(Math.max((bmi / 40) * 100, 5), 100);
+        progress.style.width = `${width}%`;
+      }
+
+      function predictDisease(bmi, symptoms) {
+        let risk = "risk-low",
+          disease = "Healthy",
+          monitoring = "Every 12 months",
+          doctor = "General Physician";
+        const symptomsList = symptoms
+          .toLowerCase()
+          .split(",")
+          .map((s) => s.trim());
+
+        if (
+          bmi >= 30 ||
+          symptomsList.includes("chest pain") ||
+          symptomsList.includes("shortness of breath")
+        ) {
+          risk = "risk-high";
+          disease = "Cardiovascular Risk";
+          monitoring = "Immediate consultation recommended";
+          doctor = "Cardiologist";
+        } else if (bmi >= 25 || symptomsList.length > 2) {
+          risk = "risk-medium";
+          disease = "Potential Health Risks";
+          monitoring = "Every 3 months";
+          doctor = "Internal Medicine Specialist";
+        }
+
+        return { risk, disease, monitoring, doctor };
+      }
+
+      function registerUser() {
+        const name = document.getElementById("name").value.trim();
+        const age = document.getElementById("age").value;
+        const bmi = parseFloat(document.getElementById("bmi").value);
+        const symptoms = document.getElementById("symptoms").value.trim();
+        const validation = document.getElementById("validationMsg");
+
+        if (!name || !age || isNaN(bmi) || !symptoms) {
+          validation.textContent = "Please fill out all fields correctly.";
+          return;
+        }
+
+        validation.textContent = "";
+        document.querySelector(".btn").innerHTML =
+          '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+
+        setTimeout(() => {
+          updateBmiGauge(bmi);
+          const result = predictDisease(bmi, symptoms);
+          document.getElementById("resultName").textContent = name;
+          document.getElementById("resultBmi").textContent = bmi.toFixed(1);
+          document.getElementById("predictedDisease").textContent =
+            result.disease;
+          document.getElementById("riskLevel").textContent =
+            result.risk.split("-")[1] + " Risk";
+          document.getElementById(
+            "recommendedMonitoring"
+          ).textContent = `Recommended Monitoring: ${result.monitoring}`;
+          document.getElementById("recommendedDoctor").textContent =
+            result.doctor;
+          document.getElementById(
+            "riskLevel"
+          ).className = `risk-level ${result.risk}`;
+          document
+            .getElementById("predictionResult")
+            .classList.remove("hidden");
+          document.getElementById("userForm").classList.add("hidden");
+          document.querySelector(".btn").innerHTML =
+            '<i class="fas fa-stethoscope"></i> Analyze Health';
+        }, 1500);
+      }
+
+      function restartApp() {
+        document.getElementById("userForm").reset();
+        document.getElementById("predictionResult").classList.add("hidden");
+        document.getElementById("userForm").classList.remove("hidden");
+        document.getElementById("bmiProgress").style.width = "0%";
+        document.getElementById("validationMsg").textContent = "";
+      }
+    </script>
+  </body>
+</html>
